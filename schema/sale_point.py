@@ -16,13 +16,20 @@ class DepartmentConnection(relay.Connection):
 
 
 class Azs(SQLAlchemyObjectType):
+
+    department = graphene.Field(Department, title=graphene.String())
+
     class Meta:
         model = AzsModel
         # interfaces = (relay.Node, )
 
     def resolve_department(self, info, **kwargs):
         query = Department.get_query(info)
-        return query
+        query = query.filter(DepartmentModel.id == self.departmentId)
+        title = kwargs.get('title', None)
+        if title:
+            query = query.filter(DepartmentModel.title == title)
+        return query.first()
 
 
 class AzsConnection(relay.Connection):
